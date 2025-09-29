@@ -1,0 +1,66 @@
+version: '3.9'
+
+services:
+  frontend:
+    image: revic2112/front-tablero-nginx:latest
+    container_name: frontend
+    restart: always
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - server
+
+  backend:
+    image: revic2112/back-tablero-desarrolloweb:tagname
+    container_name: backend
+    restart: always
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+      - ConnectionStrings__Default=Server=sqlserver,1433;Database=Tablero_DB;User Id=appuser;Password=AppUserPass!2025;TrustServerCertificate=true;
+    depends_on:
+      - sql-init
+    networks:
+      - server
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    restart: always
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong!Passw0rd
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P YourStrong!Passw0rd -C -Q 'SELECT 1' || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    networks:
+      - server
+
+  sql-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - sqlserver
+    volumes:
+      - ./script:/scripts
+    entrypoint: /bin/bash -c "sleep 15; /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourStrong!Passw0rd -i /scripts/init.sql"
+    networks:
+      - server
+      
+volumes:
+  sql_data:
+
+networks:
+  server:
