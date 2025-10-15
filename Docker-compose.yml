@@ -90,6 +90,9 @@ services:
       - KC_DB_PASSWORD=${POSTGRES_PASSWORD}
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_PROXY=${KC_PROXY}
+      - KC_HTTP_ENABLED=${KC_HTTP_ENABLED}
+      - KC_HOSTNAME=${KC_HOSTNAME}      
     command: start-dev
     ports:
       - "${KEYCLOAK_PORT}:8080"
