@@ -140,7 +140,7 @@ services:
       - server
 
 # PYTHON
-  frontend:
+  report-service:
     image: ${REPORT_IMAGE}
     container_name: report-service
     restart: always
